@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyFlix - Sua Plataforma de Streaming</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #141414;
+            color: #fff;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 40px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            color: #e50914;
+            font-size: 28px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-admin {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-admin:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+
+        .btn-exit-admin {
+            background-color: #e50914;
+            color: white;
+            border: none;
+        }
+
+        .btn-exit-admin:hover {
+            background-color: #ff0a16;
+        }
+
+        .btn-cast {
+            background-color: #4285F4;
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-cast:hover {
+            background-color: #5a95f5;
+        }
+
+        .main {
+            margin-top: 80px;
+            padding: 20px 40px;
+        }
+
+        .hero {
+            height: 60vh;
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://via.placeholder.com/1920x1080/1a1a1a/808080?text=Bem-vindo+ao+MyFlix');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            margin: -20px -40px 20px -40px;
+        }
+
+        .hero-content {
+            max-width: 600px;
+        }
+
+        .hero-title {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .hero-text {
+            font-size: 20px;
+            margin-bottom: 24px;
+            color: #e5e5e5;
+        }
+
+        .category {
+            margin-bottom: 40px;
+        }
+
+        .category-title {
+            font-size: 24px;
+            margin-bottom: 16px;
+            color: #e5e5e5;
+        }
+
+        .movie-row {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            padding: 10px 0;
+            scrollbar-width: thin;
+            scrollbar-color: #e50914 #333;
+        }
+
+        .movie-row::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .movie-row::-webkit-scrollbar-track {
+            background: #333;
+        }
+
+        .movie-row::-webkit-scrollbar-thumb {
+            background: #e50914;
+            border-radius: 4px;
+        }
+
+        .movie-card {
+            min-width: 200px;
+            height: 300px;
+            background-color: #333;
+            border-radius: 4px;
+            overflow: hidden;
+            transition: transform 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .movie-card:hover {
+            transform: scale(1.05);
+        }
+
+        .movie-card:hover .movie-actions {
+            display: flex;
+        }
+
+        .movie-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .movie-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 10px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.9));
+            color: white;
+            font-size: 14px;
+        }
+
+        .movie-title {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .movie-year {
+            color: #e5e5e5;
+            font-size: 12px;
+        }
+
+        .movie-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: none;
+            gap: 5px;
+            z-index: 10;
+        }
+
+        .edit-btn, .delete-btn {
+            width: 35px;
+            height: 35px;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .edit-btn {
+            background-color: #4285F4;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background-color: #5a95f5;
+            transform: scale(1.1);
+        }
+
+        .delete-btn {
+            background-color: #e50914;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background-color: #ff0a16;
+            transform: scale(1.1);
+        }
+
+        .movie-actions.admin-mode {
+            display: flex;
+        }
+
+        .admin-panel {
+            background-color: #1f1f1f;
+            padding: 30px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .admin-panel.active {
+            display: block;
+        }
+
+        .admin-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #e50914;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #e5e5e5;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            background-color: #333;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: white;
+            font-size: 16px;
+        }
+
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            border-color: #e50914;
+        }
+
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .btn-submit {
+            background-color: #e50914;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .btn-submit:hover {
+            background-color: #f40612;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.95);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            max-width: 1000px;
+            width: 95%;
+            background-color: #1f1f1f;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 20px;
+            background-color: #2a2a2a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .modal-header h2 {
+            color: #e50914;
+        }
+
+        .modal-close {
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            color: #e50914;
+        }
+
+        .modal-header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-cast-modal {
+            background-color: #4285F4;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-video {
+            width: 100%;
+            height: 500px;
+            background-color: #000;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .modal-video iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .modal-video video {
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+        }
+
+        .cast-overlay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0,0,0,0.7);
+            padding: 8px 12px;
+            border-radius: 4px;
+            z-index: 10;
+        }
+
+        .btn-cast-overlay {
+            background-color: #4285F4;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .modal-description {
+            color: #e5e5e5;
+            line-height: 1.6;
+            padding: 10px;
+        }
+
+        .password-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.95);
+            z-index: 2500;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .password-modal.active {
+            display: flex;
+        }
+
+        .password-content {
+            background-color: #1f1f1f;
+            padding: 40px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .password-content h2 {
+            color: #e50914;
+            margin-bottom: 20px;
+        }
+
+        .password-content input {
+            width: 100%;
+            padding: 15px;
+            background-color: #333;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: white;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+
+        .password-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #e50914;
+            font-size: 18px;
+        }
+
+        /* Modal de Edição Melhorado */
+        .edit-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.95);
+            z-index: 3000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .edit-modal.active {
+            display: flex;
+        }
+
+        .edit-content {
+            background-color: #1f1f1f;
+            padding: 30px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .edit-content h3 {
+            color: #e50914;
+            margin-bottom: 25px;
+            font-size: 24px;
+            border-bottom: 2px solid #e50914;
+            padding-bottom: 10px;
+        }
+
+        .edit-form-group {
+            margin-bottom: 20px;
+        }
+
+        .edit-form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #e5e5e5;
+            font-weight: bold;
+        }
+
+        .edit-form-group input,
+        .edit-form-group textarea,
+        .edit-form-group select {
+            width: 100%;
+            padding: 12px;
+            background-color: #333;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: white;
+            font-size: 15px;
+        }
+
+        .edit-form-group input:focus,
+        .edit-form-group textarea:focus,
+        .edit-form-group select:focus {
+            outline: none;
+            border-color: #e50914;
+        }
+
+        .edit-form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .edit-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+            position: sticky;
+            bottom: 0;
+            background-color: #1f1f1f;
+            padding-top: 15px;
+            border-top: 1px solid #333;
+        }
+
+        .btn-save {
+            background-color: #e50914;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .btn-save:hover {
+            background-color: #ff0a16;
+            transform: scale(1.05);
+        }
+
+        .btn-cancel-edit {
+            background-color: #333;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .btn-cancel-edit:hover {
+            background-color: #444;
+        }
+
+        .delete-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.95);
+            z-index: 3000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .delete-modal.active {
+            display: flex;
+        }
+
+        .delete-content {
+            background-color: #1f1f1f;
+            padding: 40px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .delete-content h3 {
+            color: #e50914;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .delete-content p {
+            color: #e5e5e5;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .delete-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn-confirm {
+            background-color: #e50914;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-confirm:hover {
+            background-color: #ff0a16;
+        }
+
+        .btn-cancel {
+            background-color: #333;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-cancel:hover {
+            background-color: #444;
+        }
+
+        .small-text {
+            color: #999;
+            font-size: 12px;
+            margin-top: 5px;
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 15px 20px;
+            }
+
+            .main {
+                padding: 20px;
+            }
+
+            .hero {
+                padding: 0 20px;
+                height: 40vh;
+            }
+
+            .hero-title {
+                font-size: 32px;
+            }
+
+            .hero-text {
+                font-size: 16px;
+            }
+
+            .movie-card {
+                min-width: 150px;
+                height: 225px;
+            }
+
+            .modal-video {
+                height: 250px;
+            }
+
+            .edit-content {
+                padding: 20px;
+            }
+
+            .edit-buttons {
+                flex-direction: column;
+            }
+
+            .btn-save, .btn-cancel-edit {
+                width: 100%;
+            }
+        }
+
+/* Botão + Mais */
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-more {
+    background: none;
+    border: 1px solid #e50914;
+    color: #e50914;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.btn-more:hover {
+    background: #e50914;
+    color: white;
+}
+
+/* Modal Todas Categorias */
+.all-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.95);
+    z-index: 4000;
+    display: none;
+    overflow-y: auto;
+}
+
+.all-modal.active {
+    display: block;
+}
+
+.all-content {
+    padding: 40px;
+}
+
+.all-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+}
+
+
+    </style>
+</head>
+<body>
+    <!-- Modal de Edição Aprimorado -->
+    <div class="edit-modal" id="editModal">
+        <div class="edit-content">
+            <h3 id="editModalTitle">✏️ Editar Filme</h3>
+            <form id="editForm">
+                <div class="edit-form-group">
+    <label for="editCategory">Categoria</label>
+    <select id="editCategory" required>
+        <option value="Filmes">Filmes</option>
+        <option value="Séries">Séries</option>
+        <option value="Documentários">Documentários</option>
+        <option value="Infantil">Infantil</option>
+        <option value="Ao Vivo">Ao Vivo</option>
+        <option value="Novelas">Novelas</option>
+    </select>
+</div>
+
+                
+                <div class="edit-form-group">
+                    <label for="editVideoType">Tipo de Vídeo</label>
+                    <select id="editVideoType" required onchange="toggleEditVideoInput()">
+                        <option value="youtube">YouTube</option>
+                        <option value="mp4">MP4 Direto</option>
+                    </select>
+                </div>
+                
+                <div class="edit-form-group" id="editYoutubeField">
+                    <label for="editYoutubeId">ID do YouTube</label>
+                    <input type="text" id="editYoutubeId" placeholder="Ex: dQw4w9WgXcQ">
+                    <small class="small-text">Cole apenas o ID (11 caracteres)</small>
+                </div>
+                
+                <div class="edit-form-group" id="editMp4Field" style="display: none;">
+                    <label for="editMp4Url">URL do Vídeo MP4</label>
+                    <input type="url" id="editMp4Url" placeholder="https://exemplo.com/video.mp4">
+                    <small class="small-text">Use links diretos de MP4</small>
+                </div>
+                
+                <div class="edit-form-group">
+                    <label for="editThumbnail">URL da Thumbnail</label>
+                    <input type="url" id="editThumbnail" required placeholder="https://exemplo.com/imagem.jpg">
+                    <small class="small-text">Link direto da imagem (jpg, png)</small>
+                </div>
+                
+                <div class="edit-buttons">
+                    <button type="button" class="btn-cancel-edit" onclick="closeEditModal()">Cancelar</button>
+                    <button type="submit" class="btn-save">💾 Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Deleção -->
+    <div class="delete-modal" id="deleteModal">
+        <div class="delete-content">
+            <h3>🗑️ Remover Filme</h3>
+            <p id="deleteMovieTitle">Tem certeza que deseja remover este filme?</p>
+            <div class="delete-buttons">
+                <button class="btn-cancel" onclick="closeDeleteModal()">Cancelar</button>
+                <button class="btn-confirm" onclick="confirmDelete()">Sim, remover</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Senha do Admin -->
+    <div class="password-modal" id="passwordModal">
+        <div class="password-content">
+            <h2>🔒 Acesso Restrito</h2>
+            <input type="password" id="adminPassword" placeholder="Digite a senha de admin">
+            <div class="password-buttons">
+                <button class="btn btn-submit" onclick="checkPassword()">Acessar</button>
+                <button class="btn btn-admin" onclick="closePasswordModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal do Filme -->
+    <div class="modal" id="movieModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Título do Filme</h2>
+                <div class="modal-header-buttons">
+                    <button class="btn-cast-modal" onclick="castToTV()">
+                        <span>📺</span> Transmitir
+                    </button>
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="modal-video" id="modalVideo">
+                    <div class="loading">Carregando...</div>
+                    <div class="cast-overlay" id="castOverlay" style="display: none;">
+                        <button class="btn-cast-overlay" onclick="castToTV()">
+                            <span>📺</span> Transmitir para TV
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-description" id="modalDescription"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">MYFLIX</div>
+        <div class="nav-buttons">
+            <button class="btn btn-cast" onclick="showCastInstructions()">
+                <span>📺</span> Transmitir
+            </button>
+            <button class="btn btn-admin" onclick="showPasswordModal()" id="adminBtn">Admin</button>
+            <button class="btn btn-exit-admin" onclick="exitAdminMode()" id="exitAdminBtn" style="display: none;">Sair do Admin</button>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="main">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1 class="hero-title">Bem-vindo ao MyFlix</h1>
+                <p class="hero-text">Filmes e séries ilimitados. Assista onde quiser. <span style="color: #e50914;">100% GRÁTIS!</span></p>
+            </div>
+        </section>
+
+        <!-- Painel Admin -->
+        <section class="admin-panel" id="adminPanel">
+            <h2 class="admin-title">👤 Painel do Administrador</h2>
+            <form id="movieForm" onsubmit="addMovie(event)">
+                <div class="form-group">
+                    <label for="title">Título do Filme</label>
+                    <input type="text" id="title" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Descrição</label>
+                    <textarea id="description" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="year">Ano</label>
+                    <input type="number" id="year" min="1900" max="2026" required>
+                </div>
+                
+
+<div class="edit-form-group">
+    <label for="editTitle">Título</label>
+    <input type="text" id="editTitle" required>
+</div>
+
+<div class="edit-form-group">
+    <label for="editDescription">Descrição</label>
+    <textarea id="editDescription" required></textarea>
+</div>
+
+<div class="edit-form-group">
+    <label for="editYear">Ano</label>
+    <input type="number" id="editYear" required>
+</div>
+
+
+                <div class="form-group">
+                    <label for="category">Categoria</label>
+                    <select id="category" required>
+    <option value="Filmes">Filmes</option>
+    <option value="Séries">Séries</option>
+    <option value="Documentários">Documentários</option>
+    <option value="Infantil">Infantil</option>
+    <option value="Ao Vivo">Ao Vivo</option>
+    <option value="Novelas">Novelas</option>
+</select>
+
+                </div>
+                
+                <div class="form-group">
+                    <label for="videoType">Tipo de Vídeo</label>
+                    <select id="videoType" required>
+                        <option value="youtube">YouTube</option>
+                        <option value="mp4">MP4 Direto</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="youtubeField">
+                    <label for="youtubeId">ID do YouTube</label>
+                    <input type="text" id="youtubeId" placeholder="Ex: dQw4w9WgXcQ">
+                    <small style="color: #999;">Cole apenas o ID após o v= ou youtu.be/</small>
+                </div>
+                
+                <div class="form-group" id="mp4Field" style="display: none;">
+                    <label for="mp4Url">URL do Vídeo MP4</label>
+                    <input type="url" id="mp4Url" placeholder="https://exemplo.com/video.mp4">
+                    <small style="color: #999;">Use links diretos de MP4</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="thumbnail">URL da Thumbnail</label>
+                    <input type="url" id="thumbnail" required>
+                </div>
+                
+                <button type="submit" class="btn-submit">➕ Adicionar Filme</button>
+            </form>
+        </section>
+
+        <!-- Container de Filmes -->
+        <div id="movieContainer"></div>
+    </main>
+
+    <script>
+        // Admin password
+        const ADMIN_PASSWORD = "admin123";
+        
+        // Variáveis para controle
+        let movieToDelete = null;
+        let movieToEdit = null;
+        let isAdminMode = false;
+        let currentMovieUrl = '';
+        let currentMovieType = '';
+
+        // Load movies from localStorage
+        let movies = JSON.parse(localStorage.getItem('movies')) || [];
+
+        function saveMovies() {
+            localStorage.setItem('movies', JSON.stringify(movies));
+        }
+
+        // Toggle video fields based on selection
+        document.getElementById('videoType').addEventListener('change', function() {
+            const type = this.value;
+            document.getElementById('youtubeField').style.display = type === 'youtube' ? 'block' : 'none';
+            document.getElementById('mp4Field').style.display = type === 'mp4' ? 'block' : 'none';
+        });
+
+        function displayMovies() {
+            const container = document.getElementById('movieContainer');
+            
+            if (movies.length === 0) {
+                container.innerHTML = `
+                    <div class="category">
+                        <h2 class="category-title">Filmes</h2>
+                        <div class="movie-row">
+                            <div class="movie-card" style="display: flex; align-items: center; justify-content: center; background-color: #2a2a2a;">
+                                <p style="color: #666; text-align: center; padding: 20px;">
+                                    Nenhum filme adicionado ainda.<br>
+                                    Acesse o painel Admin para adicionar filmes.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const categories = {};
+            movies.forEach(movie => {
+                if (!categories[movie.category]) {
+                    categories[movie.category] = [];
+                }
+                categories[movie.category].push(movie);
+            });
+
+            let html = '';
+            for (const [category, categoryMovies] of Object.entries(categories)) {
+                html += `
+                    <div class="category">
+                        <div class="category-header">
+    <h2 class="category-title">${category}</h2>
+    <button class="btn-more" onclick="openAllCategory('${category}')">
+        + Mais
+    </button>
+</div>
+
+                        <div class="movie-row">
+                `;
+                
+                categoryMovies.forEach(movie => {
+                    html += `
+                        <div class="movie-card" onclick="watchMovie('${movie.id}')">
+                            ${isAdminMode ? `
+                                <div class="movie-actions admin-mode">
+                                    <button class="edit-btn" onclick="event.stopPropagation(); showEditModal('${movie.id}')" title="Editar filme">✏️</button>
+                                    <button class="delete-btn" onclick="event.stopPropagation(); showDeleteModal('${movie.id}', '${movie.title}')" title="Remover filme">×</button>
+                                </div>
+                            ` : ''}
+                            <img src="${movie.thumbnail}" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/200x300/333/666?text=Sem+Imagem'">
+                            <div class="movie-info">
+                                <div class="movie-title">${movie.title}</div>
+                                <div class="movie-year">${movie.year}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></div>`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        function addMovie(event) {
+            event.preventDefault();
+            
+            const videoType = document.getElementById('videoType').value;
+            let videoUrl = '';
+            
+            if (videoType === 'youtube') {
+                videoUrl = document.getElementById('youtubeId').value;
+            } else {
+                videoUrl = document.getElementById('mp4Url').value;
+            }
+            
+            const movie = {
+                id: Date.now().toString(),
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                year: document.getElementById('year').value,
+                category: document.getElementById('category').value,
+                thumbnail: document.getElementById('thumbnail').value,
+                videoUrl: videoUrl,
+                videoType: videoType
+            };
+            
+            movies.push(movie);
+            saveMovies();
+            displayMovies();
+            event.target.reset();
+            alert('✅ Filme adicionado com sucesso!');
+        }
+
+        function watchMovie(movieId) {
+            const movie = movies.find(m => m.id === movieId);
+            if (!movie) return;
+            
+            document.getElementById('modalTitle').textContent = movie.title;
+            document.getElementById('modalDescription').textContent = movie.description;
+            
+            // Salva informações do vídeo atual para transmitir
+            currentMovieUrl = movie.videoUrl;
+            currentMovieType = movie.videoType;
+            
+            const modalVideo = document.getElementById('modalVideo');
+            const castOverlay = document.getElementById('castOverlay');
+            
+            if (movie.videoType === 'youtube') {
+                // Extrai apenas o ID se for URL completa
+                let videoId = movie.videoUrl;
+                if (videoId.includes('youtube.com') || videoId.includes('youtu.be')) {
+                    const match = videoId.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+                    if (match) {
+                        videoId = match[1];
+                    }
+                }
+                
+                modalVideo.innerHTML = `
+                    <iframe 
+                        src="https://www.youtube.com/embed/${videoId}?autoplay=1" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen
+                        style="width:100%; height:100%; border:none;">
+                    </iframe>
+                `;
+                castOverlay.style.display = 'block';
+            } else {
+                modalVideo.innerHTML = `
+                    <video controls autoplay style="width:100%; height:100%;" id="videoPlayer">
+                        <source src="${movie.videoUrl}" type="video/mp4">
+                        Seu navegador não suporta vídeo.
+                    </video>
+                `;
+                castOverlay.style.display = 'block';
+            }
+            
+            document.getElementById('movieModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('movieModal').classList.remove('active');
+            document.getElementById('modalVideo').innerHTML = '<div class="loading">Carregando...</div>';
+            document.getElementById('castOverlay').style.display = 'none';
+        }
+
+        function showPasswordModal() {
+            document.getElementById('passwordModal').classList.add('active');
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('adminPassword').focus();
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').classList.remove('active');
+        }
+
+        function checkPassword() {
+            const password = document.getElementById('adminPassword').value;
+            if (password === ADMIN_PASSWORD) {
+                closePasswordModal();
+                enterAdminMode();
+            } else {
+                alert('❌ Senha incorreta!');
+                document.getElementById('adminPassword').value = '';
+                document.getElementById('adminPassword').focus();
+            }
+        }
+
+        function enterAdminMode() {
+            isAdminMode = true;
+            document.getElementById('adminPanel').classList.add('active');
+            document.getElementById('adminBtn').style.display = 'none';
+            document.getElementById('exitAdminBtn').style.display = 'block';
+            displayMovies();
+        }
+
+        function exitAdminMode() {
+            isAdminMode = false;
+            document.getElementById('adminPanel').classList.remove('active');
+            document.getElementById('adminBtn').style.display = 'block';
+            document.getElementById('exitAdminBtn').style.display = 'none';
+            displayMovies();
+        }
+
+        // Funções de Edição
+        function showEditModal(movieId) {
+            if (!isAdminMode) return;
+            
+            const movie = movies.find(m => m.id === movieId);
+            if (!movie) return;
+            
+            movieToEdit = movieId;
+            
+            // Preenche o formulário com os dados do filme
+            document.getElementById('editTitle').value = movie.title;
+            document.getElementById('editDescription').value = movie.description;
+            document.getElementById('editYear').value = movie.year;
+            document.getElementById('editCategory').value = movie.category;
+            document.getElementById('editVideoType').value = movie.videoType;
+            document.getElementById('editThumbnail').value = movie.thumbnail;
+            
+            if (movie.videoType === 'youtube') {
+                document.getElementById('editYoutubeId').value = movie.videoUrl;
+                document.getElementById('editYoutubeField').style.display = 'block';
+                document.getElementById('editMp4Field').style.display = 'none';
+            } else {
+                document.getElementById('editMp4Url').value = movie.videoUrl;
+                document.getElementById('editYoutubeField').style.display = 'none';
+                document.getElementById('editMp4Field').style.display = 'block';
+            }
+            
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function toggleEditVideoInput() {
+            const type = document.getElementById('editVideoType').value;
+            document.getElementById('editYoutubeField').style.display = type === 'youtube' ? 'block' : 'none';
+            document.getElementById('editMp4Field').style.display = type === 'mp4' ? 'block' : 'none';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+            movieToEdit = null;
+        }
+
+        // Configurar o evento de submit do formulário de edição
+        document.getElementById('editForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            if (!isAdminMode || !movieToEdit) return;
+            
+            const videoType = document.getElementById('editVideoType').value;
+            let videoUrl = '';
+            
+            if (videoType === 'youtube') {
+                videoUrl = document.getElementById('editYoutubeId').value;
+            } else {
+                videoUrl = document.getElementById('editMp4Url').value;
+            }
+            
+            // Encontra e atualiza o filme
+            const movieIndex = movies.findIndex(m => m.id === movieToEdit);
+            if (movieIndex !== -1) {
+                movies[movieIndex] = {
+                    ...movies[movieIndex],
+                    title: document.getElementById('editTitle').value,
+                    description: document.getElementById('editDescription').value,
+                    year: document.getElementById('editYear').value,
+                    category: document.getElementById('editCategory').value,
+                    thumbnail: document.getElementById('editThumbnail').value,
+                    videoUrl: videoUrl,
+                    videoType: videoType
+                };
+                
+                saveMovies();
+                displayMovies();
+                closeEditModal();
+                alert('✅ Filme atualizado com sucesso!');
+            }
+        });
+
+        // Funções para deletar filmes
+        function showDeleteModal(movieId, movieTitle) {
+            if (!isAdminMode) return;
+            
+            movieToDelete = movieId;
+            document.getElementById('deleteMovieTitle').textContent = `Tem certeza que deseja remover "${movieTitle}"?`;
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('active');
+            movieToDelete = null;
+        }
+
+        function confirmDelete() {
+            if (!isAdminMode || !movieToDelete) return;
+            
+            movies = movies.filter(m => m.id !== movieToDelete);
+            saveMovies();
+            displayMovies();
+            closeDeleteModal();
+            alert('🗑️ Filme removido com sucesso!');
+        }
+
+        // Função para transmitir para TV
+        function castToTV() {
+            if (!currentMovieUrl) {
+                alert('Nenhum vídeo selecionado para transmitir!');
+                return;
+            }
+
+            let castUrl = '';
+            
+            if (currentMovieType === 'youtube') {
+                // Para YouTube, monta URL para TV
+                let videoId = currentMovieUrl;
+                if (videoId.includes('youtube.com') || videoId.includes('youtu.be')) {
+                    const match = videoId.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+                    if (match) {
+                        videoId = match[1];
+                    }
+                }
+                castUrl = `https://www.youtube.com/watch?v=${videoId}`;
+            } else {
+                castUrl = currentMovieUrl;
+            }
+
+            if (navigator.share) {
+                navigator.share({
+                    title: document.getElementById('modalTitle').textContent,
+                    text: 'Assistir na TV',
+                    url: castUrl
+                }).then(() => {
+                    alert('📺 Link enviado! Abra no app da sua TV');
+                }).catch(() => {
+                    alert(`📺 Link para TV: ${castUrl}`);
+                });
+            } else {
+                alert(`📺 Link para TV: ${castUrl}`);
+            }
+        }
+
+        function showCastInstructions() {
+            alert(`📺 Como transmitir para TV:\n\n1. Baixe o app "Web Video Cast" (grátis)\n2. Abra um filme no MyFlix\n3. Clique em "Transmitir"\n4. Escolha sua TV na lista\n\nFunciona com Chromecast, Smart TV, Roku, etc.`);
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('movieModal');
+            const passwordModal = document.getElementById('passwordModal');
+            const deleteModal = document.getElementById('deleteModal');
+            const editModal = document.getElementById('editModal');
+            
+            if (event.target === modal) closeModal();
+            if (event.target === passwordModal) closePasswordModal();
+            if (event.target === deleteModal) closeDeleteModal();
+            if (event.target === editModal) closeEditModal();
+        };
+
+        // Add example movies if none exist
+        if (movies.length === 0) {
+            movies = [
+                {
+                    id: '1',
+                    title: 'Sobrenatural',
+                    description: 'Um filme de terror sobrenatural.',
+                    year: '2024',
+                    category: 'Filmes',
+                    thumbnail: 'https://via.placeholder.com/200x300/000000/e50914?text=Sobrenatural',
+                    videoUrl: 'dQw4w9WgXcQ',
+                    videoType: 'youtube'
+                }
+            ];
+            saveMovies();
+        }
+
+        displayMovies();
+
+/* ===== MODAL MOSTRAR TODOS DA CATEGORIA ===== */
+
+function openAllCategory(category) {
+    const modal = document.getElementById("allModal");
+    const title = document.getElementById("allTitle");
+    const container = document.getElementById("allContainer");
+
+    title.textContent = category;
+    container.innerHTML = "";
+
+    // Filtra só os filmes da categoria
+    const filtered = movies.filter(m => m.category === category);
+
+    if (filtered.length === 0) {
+        container.innerHTML = "<p>Nenhum item encontrado.</p>";
+    }
+
+    filtered.forEach(movie => {
+        container.innerHTML += `
+            <div class="movie-card" onclick="watchMovie('${movie.id}')">
+                <img src="${movie.thumbnail}">
+                <div class="movie-info">
+                    <div class="movie-title">${movie.title}</div>
+                    <div class="movie-year">${movie.year}</div>
+                </div>
+            </div>
+        `;
+    });
+
+    modal.classList.add("active");
+}
+
+function closeAllModal() {
+    document.getElementById("allModal").classList.remove("active");
+}
+
+</script>
+
+<!-- Modal Todas Categorias -->
+<div class="all-modal" id="allModal">
+    <div class="all-content">
+        <h2 id="allTitle" style="color:#e50914; margin-bottom:20px;"></h2>
+        <button class="btn btn-exit-admin" onclick="closeAllModal()">Fechar</button>
+
+        <div class="all-grid" id="allContainer"></div>
+    </div>
+</div>
+
+
+</body>
+</html>
